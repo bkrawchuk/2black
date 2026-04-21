@@ -24,6 +24,8 @@ from black.comments import (
     generate_comments,
     list_comments,
 )
+from black.const import INDENT_WIDTH
+from black.indent import get_indent
 from black.lines import (
     Line,
     RHSResult,
@@ -491,7 +493,7 @@ class LineGenerator(Visitor[Line]):
             quote_len = 1 if docstring[1] != quote_char else 3
             docstring = docstring[quote_len:-quote_len]
             docstring_started_empty = not docstring
-            indent = " " * 4 * self.current_line.depth
+            indent = get_indent(self.current_line.depth)
 
             if is_multiline_string(leaf):
                 docstring = fix_multiline_docstring(docstring, indent)
@@ -1941,7 +1943,7 @@ def generate_trailers_to_omit(line: Line, line_length: int) -> Iterator[set[Leaf
     if not line.magic_trailing_comma:
         yield omit
 
-    length = 4 * line.depth
+    length = INDENT_WIDTH * line.depth
     opening_bracket: Leaf | None = None
     closing_bracket: Leaf | None = None
     inner_brackets: set[LeafID] = set()

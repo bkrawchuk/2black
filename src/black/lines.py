@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from typing import Optional, TypeVar, Union, cast
 
 from black.brackets import COMMA_PRIORITY, DOT_PRIORITY, BracketTracker
+from black.const import INDENT_WIDTH
+from black.indent import get_indent
 from black.mode import Mode
 from black.nodes import (
     BRACKETS,
@@ -480,7 +482,7 @@ class Line:
         if not self:
             return "\n"
 
-        indent = "    " * self.depth
+        indent = get_indent(self.depth)
         leaves = iter(self.leaves)
         first = next(leaves)
         res = f"{first.prefix}{indent}{first.value}"
@@ -1074,7 +1076,7 @@ def can_omit_invisible_parens(
 def _can_omit_opening_paren(line: Line, *, first: Leaf, line_length: int) -> bool:
     """See `can_omit_invisible_parens`."""
     remainder = False
-    length = 4 * line.depth
+    length = INDENT_WIDTH * line.depth
     _index = -1
     for _index, leaf, leaf_length in line.enumerate_with_length():
         if leaf.type in CLOSING_BRACKETS and leaf.opening_bracket is first:
@@ -1098,7 +1100,7 @@ def _can_omit_opening_paren(line: Line, *, first: Leaf, line_length: int) -> boo
 
 def _can_omit_closing_paren(line: Line, *, last: Leaf, line_length: int) -> bool:
     """See `can_omit_invisible_parens`."""
-    length = 4 * line.depth
+    length = INDENT_WIDTH * line.depth
     seen_other_brackets = False
     for _index, leaf, leaf_length in line.enumerate_with_length():
         length += leaf_length
